@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntryController;
 use Illuminate\Support\Facades\Route;
@@ -8,6 +9,9 @@ Route::get('/', fn() => redirect()->route('dashboard'));
 
 // Dashboard — aggregates & chart
 Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+// Budgets
+Route::resource('budgets', BudgetController::class)->only(['index', 'store', 'destroy']);
 
 // Entries — full CRUD
 Route::resource('entries', EntryController::class)->except('show');

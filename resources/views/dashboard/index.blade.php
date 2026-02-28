@@ -66,27 +66,61 @@
 
         {{-- Expense category breakdown this month --}}
         <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
-            <p class="font-semibold text-slate-700 mb-4">Expenses by Category</p>
+            <div class="flex items-center justify-between mb-4">
+                <p class="font-semibold text-slate-700">Expenses by Category</p>
+                <a href="{{ route('budgets.index') }}" class="text-xs text-slate-400 hover:text-slate-700">Manage budgets →</a>
+            </div>
+            @php $budgetMap = $budgets->keyBy('category'); @endphp
             @if ($expenseByCategory->isEmpty())
                 <p class="text-slate-400 text-sm text-center py-8">No expenses this month.</p>
             @else
-                <div class="space-y-2.5">
+                <div class="space-y-3">
                     @php $maxExpense = $expenseByCategory->max('total'); @endphp
                     @foreach ($expenseByCategory as $cat)
-                        <div>
+                        @php
+                            $budget   = $budgetMap[$cat->category] ?? null;
+                            $isOver   = $budget && $cat->total > $budget->amount;
+                            $isWarn   = $budget && !$isOver && ($cat->total / $budget->amount) >= 0.8;
+                            $barPct   = $budget
+                                ? min(round(($cat->total / $budget->amount) * 100), 100)
+                                : round($maxExpense > 0 ? ($cat->total / $maxExpense * 100) : 0);
+                        @endphp
+                        <div class="{{ $isOver ? 'bg-red-50 border border-red-200 rounded-lg px-3 py-2 -mx-1' : '' }}">
                             <div class="flex items-center justify-between text-sm mb-1">
-                                <span class="text-slate-600 font-medium">{{ $cat->category }}</span>
-                                <span class="mono text-xs font-semibold text-red-600">Rp
-                                    {{ number_format($cat->total, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-red-400 rounded-full"
-                                    style="width: {{ $maxExpense > 0 ? ($cat->total / $maxExpense * 100) : 0 }}%">
+                                <div class="flex items-center gap-1.5">
+                                    @if ($isOver)
+                                        <span class="text-red-500 text-xs">🔴</span>
+                                    @elseif ($isWarn)
+                                        <span class="text-amber-500 text-xs">⚠️</span>
+                                    @endif
+                                    <span class="font-medium {{ $isOver ? 'text-red-700' : 'text-slate-600' }}">{{ $cat->category }}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="mono text-xs font-semibold {{ $isOver ? 'text-red-600' : 'text-slate-600' }}">
+                                        Rp {{ number_format($cat->total, 0, ',', '.') }}
+                                    </span>
+                                    @if ($budget)
+                                        <span class="text-xs text-slate-400"> / Rp {{ number_format($budget->amount, 0, ',', '.') }}</span>
+                                    @endif
                                 </div>
                             </div>
+                            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all
+                                            {{ $isOver ? 'bg-red-500' : ($isWarn ? 'bg-amber-400' : ($budget ? 'bg-emerald-400' : 'bg-red-400')) }}"
+                                     style="width: {{ $barPct }}%">
+                                </div>
+                            </div>
+                            @if ($isOver)
+                                <p class="text-xs text-red-500 mt-0.5">Over by Rp {{ number_format($cat->total - $budget->amount, 0, ',', '.') }}</p>
+                            @endif
                         </div>
                     @endforeach
                 </div>
+            @endif
+            @if ($budgets->isEmpty())
+                <p class="text-xs text-slate-400 mt-4 text-center">
+                    <a href="{{ route('budgets.index') }}" class="text-emerald-600 hover:underline">Set monthly budgets</a> to track limits.
+                </p>
             @endif
         </div>
     </div>

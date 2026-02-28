@@ -106,6 +106,10 @@
                 <span class="text-red-400">Add Expense</span>
             </a>
             <div class="border-t border-slate-700 my-3"></div>
+            <a href="{{ route('budgets.index') }}" onclick="closeSidebar()" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                      {{ request()->routeIs('budgets.*') ? 'nav-active' : 'hover:bg-slate-800 hover:text-white' }}">
+                <span>💸</span> Budgets
+            </a>
             <a href="{{ route('entries.trash') }}" onclick="closeSidebar()"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
                       {{ request()->routeIs('entries.trash') ? 'nav-active' : 'hover:bg-slate-800 hover:text-white' }}">
@@ -164,7 +168,7 @@
         <a href="{{ route('dashboard') }}" class="flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium gap-0.5
                   {{ request()->routeIs('dashboard') ? 'text-slate-900' : 'text-slate-400' }}">
             <span class="text-xl leading-none">📊</span>
-            <span>Dashboard</span>
+            <span>Home</span>
         </a>
         <a href="{{ route('entries.index') }}" class="flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium gap-0.5
                   {{ request()->routeIs('entries.index') ? 'text-slate-900' : 'text-slate-400' }}">
@@ -175,6 +179,11 @@
             class="flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium gap-0.5 text-emerald-600">
             <span class="text-xl leading-none">➕</span>
             <span>Add</span>
+        </a>
+        <a href="{{ route('budgets.index') }}" class="flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium gap-0.5
+                  {{ request()->routeIs('budgets.*') ? 'text-slate-900' : 'text-slate-400' }}">
+            <span class="text-xl leading-none">💸</span>
+            <span>Budgets</span>
         </a>
         <a href="{{ route('entries.trash') }}" class="flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium gap-0.5
                   {{ request()->routeIs('entries.trash') ? 'text-slate-900' : 'text-slate-400' }}">

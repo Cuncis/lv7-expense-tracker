@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Budget;
 use App\Models\Entry;
 use Illuminate\Http\Request;
 
@@ -68,6 +69,9 @@ class DashboardController extends Controller
             ->limit(8)
             ->get();
 
+        // ── Budgets with current month spending ────────────────────────────────
+        $budgets = Budget::withCurrentMonthSpending();
+
         // ── Totals count ──────────────────────────────────────────────────────
         $totalEntries = Entry::count();
         $trashCount = Entry::onlyTrashed()->count();
@@ -86,7 +90,8 @@ class DashboardController extends Controller
             'expenseData',
             'recentEntries',
             'totalEntries',
-            'trashCount'
+            'trashCount',
+            'budgets'
         ));
     }
 }
