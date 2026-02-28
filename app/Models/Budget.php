@@ -23,7 +23,7 @@ class Budget extends Model
 
         $spent = Entry::expense()
             ->whereBetween('date', [$monthStart, $monthEnd])
-            ->selectRaw('category, SUM(amount) as total')
+            ->selectRaw('category, SUM(amount * exchange_rate) as total')
             ->groupBy('category')
             ->pluck('total', 'category');
 

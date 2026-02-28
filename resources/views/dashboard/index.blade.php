@@ -5,7 +5,9 @@
 @section('content')
 
     {{-- ===== THIS MONTH STAT CARDS ===== --}}
-    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">This month</p>
+    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+        This month <span class="normal-case font-normal text-slate-300 ml-1">· all amounts in IDR</span>
+    </p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
 
         <div class="bg-white rounded-xl border border-slate-200 p-5">

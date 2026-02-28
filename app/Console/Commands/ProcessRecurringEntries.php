@@ -45,6 +45,8 @@ class ProcessRecurringEntries extends Command
                             'category' => $template->category,
                             'description' => $template->description,
                             'amount' => $template->amount,
+                            'currency' => $template->currency ?? 'IDR',
+                            'exchange_rate' => $template->exchange_rate ?? 1,
                             'date' => $nextDue->toDateString(),
                             'note' => $template->note,
                             'recurring' => false,

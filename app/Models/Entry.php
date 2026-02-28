@@ -15,6 +15,8 @@ class Entry extends Model
         'category',
         'description',
         'amount',
+        'currency',
+        'exchange_rate',
         'date',
         'note',
         'recurring',
@@ -25,11 +27,15 @@ class Entry extends Model
 
     protected $casts = [
         'amount' => 'integer',
+        'exchange_rate' => 'float',
         'date' => 'date',
         'recurring' => 'boolean',
         'recurring_until' => 'date',
         'last_generated_at' => 'date',
     ];
+
+    /** Currencies available in the entry form */
+    const SUPPORTED_CURRENCIES = ['IDR', 'USD', 'EUR', 'SGD', 'MYR', 'JPY', 'GBP', 'AUD', 'CNY', 'SAR'];
 
     const INCOME_CATEGORIES = [
         'Salary',
@@ -118,9 +124,19 @@ class Entry extends Model
             ->groupBy('month');
     }
 
-    public function getIsIncomeAttribute()
+    public function getIsIncomeAttribute(): bool
     {
         return $this->type === 'income';
+    }
+
+    /**
+     * Amount converted to IDR using the stored exchange_rate.
+     * For legacy rows (exchange_rate = 0 or null), falls back to amount as-is.
+     */
+    public function getAmountInIdrAttribute(): int
+    {
+        $rate = $this->exchange_rate ?: 1.0;
+        return (int) round($this->amount * $rate);
     }
 
     public static function allCategories()

@@ -3,7 +3,8 @@
 
 <div x-data="{
         type: '{{ old('type', $entry->type ?? $defaultType ?? 'expense') }}',
-        recurring: {{ old('recurring', $entry->recurring ?? false) ? 'true' : 'false' }}
+        recurring: {{ old('recurring', $entry->recurring ?? false) ? 'true' : 'false' }},
+        currency: '{{ old('currency', $entry->currency ?? 'IDR') }}'
     }" class="space-y-5">
 
     {{-- Type selector --}}
@@ -69,8 +70,8 @@
         @error('category') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
     </div>
 
-    {{-- Description + Amount in a row --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {{-- Description + Currency + Amount in a row --}}
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div class="sm:col-span-2">
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Description *</label>
             <input type="text" name="description"
@@ -80,8 +81,23 @@
             @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
+        {{-- Currency selector --}}
         <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Amount (Rp) *</label>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Currency</label>
+            <select name="currency" x-model="currency"
+                    class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white">
+                @foreach (\App\Models\Entry::SUPPORTED_CURRENCIES as $cur)
+                    <option value="{{ $cur }}" {{ old('currency', $entry->currency ?? 'IDR') === $cur ? 'selected' : '' }}>
+                        {{ $cur }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                Amount (<span x-text="currency">IDR</span>) *
+            </label>
             <input type="number" name="amount" step="1" min="1"
                    value="{{ old('amount', $entry->amount ?? '') }}"
                    placeholder="0"

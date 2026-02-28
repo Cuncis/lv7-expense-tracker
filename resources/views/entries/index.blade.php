@@ -135,14 +135,20 @@
                             <td class="px-5 py-3 hidden sm:table-cell">
                                 <span
                                     class="inline-block px-2 py-0.5 rounded text-xs font-semibold
-                                                                    {{ $entry->is_income ? 'badge-income' : 'badge-expense' }}">
+                                                                            {{ $entry->is_income ? 'badge-income' : 'badge-expense' }}">
                                     {{ ucfirst($entry->type) }}
                                 </span>
                             </td>
                             <td
                                 class="px-5 py-3 text-right mono font-bold
-                                                                       {{ $entry->is_income ? 'amount-income' : 'amount-expense' }}">
-                                {{ $entry->is_income ? '+' : '−' }}Rp {{ number_format($entry->amount, 0, ',', '.') }}
+                                                                               {{ $entry->is_income ? 'amount-income' : 'amount-expense' }}">
+                                @php $cur = $entry->currency ?? 'IDR'; @endphp
+                                {{ $entry->is_income ? '+' : '−' }}{{ $cur }} {{ number_format($entry->amount, 0, ',', '.') }}
+                                @if ($cur !== 'IDR')
+                                    <div class="text-xs font-normal text-slate-400 mt-0.5">
+                                        ≈ Rp {{ number_format($entry->amount_in_idr, 0, ',', '.') }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-3 py-3 text-right">
                                 <div

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEntryRequest;
 use App\Models\Entry;
+use App\Services\CurrencyService;
 use Illuminate\Http\Request;
 
 class EntryController extends Controller
@@ -25,8 +26,8 @@ class EntryController extends Controller
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc');
 
-        $filteredIncome = (clone $query)->income()->sum('amount');
-        $filteredExpense = (clone $query)->expense()->sum('amount');
+        $filteredIncome = (clone $query)->income()->selectRaw('SUM(amount * exchange_rate)')->value('SUM(amount * exchange_rate)') ?? 0;
+        $filteredExpense = (clone $query)->expense()->selectRaw('SUM(amount * exchange_rate)')->value('SUM(amount * exchange_rate)') ?? 0;
         $filteredNet = $filteredIncome - $filteredExpense;
 
         $entries = $query->paginate(20)->withQueryString();
@@ -57,7 +58,7 @@ class EntryController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            fputcsv($handle, ['Date', 'Type', 'Category', 'Description', 'Amount (Rp)', 'Note']);
+            fputcsv($handle, ['Date', 'Type', 'Category', 'Description', 'Currency', 'Amount', 'Amount (Rp IDR)', 'Note']);
 
             // Chunk to avoid memory exhaustion on large datasets
             $query->chunk(500, function ($entries) use ($handle) {
@@ -67,7 +68,9 @@ class EntryController extends Controller
                         ucfirst($entry->type),
                         $entry->category,
                         $entry->description,
+                        $entry->currency ?? 'IDR',
                         $entry->amount,
+                        $entry->amount_in_idr,
                         $entry->note ?? '',
                     ]);
                 }
@@ -99,7 +102,12 @@ class EntryController extends Controller
      */
     public function store(StoreEntryRequest $request)
     {
-        Entry::create($request->validated());
+        $data = $request->validated();
+        $currency = $data['currency'] ?? 'IDR';
+        $data['currency'] = $currency;
+        $data['exchange_rate'] = app(CurrencyService::class)->idrPerUnit($currency);
+
+        Entry::create($data);
 
         return redirect()->route('entries.index')
             ->with('success', $request->type === 'income'
@@ -123,7 +131,12 @@ class EntryController extends Controller
      */
     public function update(StoreEntryRequest $request, Entry $entry)
     {
-        $entry->update($request->validated());
+        $data = $request->validated();
+        $currency = $data['currency'] ?? 'IDR';
+        $data['currency'] = $currency;
+        $data['exchange_rate'] = app(CurrencyService::class)->idrPerUnit($currency);
+
+        $entry->update($data);
 
         return redirect()->route('entries.index')
             ->with('success', '✏️ Entry updated.');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Entry;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreEntryRequest extends FormRequest
@@ -31,6 +32,7 @@ class StoreEntryRequest extends FormRequest
             'recurring' => 'nullable|boolean',
             'frequency' => 'nullable|in:daily,weekly,monthly,yearly|required_if:recurring,1',
             'recurring_until' => 'nullable|date|after:date',
+            'currency' => 'nullable|string|in:' . implode(',', Entry::SUPPORTED_CURRENCIES),
         ];
     }
 

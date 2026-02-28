@@ -13,25 +13,25 @@ class DashboardController extends Controller
         $monthStart = now()->startOfMonth()->format('Y-m-d');
         $monthEnd = now()->endOfMonth()->format('Y-m-d');
 
-        $monthIncome = Entry::income()->forDateRange($monthStart, $monthEnd)->sum('amount');
-        $monthExpense = Entry::expense()->forDateRange($monthStart, $monthEnd)->sum('amount');
+        $monthIncome = Entry::income()->forDateRange($monthStart, $monthEnd)->selectRaw('COALESCE(SUM(amount * exchange_rate), 0) as total')->value('total') ?? 0;
+        $monthExpense = Entry::expense()->forDateRange($monthStart, $monthEnd)->selectRaw('COALESCE(SUM(amount * exchange_rate), 0) as total')->value('total') ?? 0;
         $monthNet = $monthIncome - $monthExpense;
 
         // All time
-        $totalIncome = Entry::income()->sum('amount');
-        $totalExpense = Entry::expense()->sum('amount');
+        $totalIncome = Entry::income()->selectRaw('COALESCE(SUM(amount * exchange_rate), 0) as total')->value('total') ?? 0;
+        $totalExpense = Entry::expense()->selectRaw('COALESCE(SUM(amount * exchange_rate), 0) as total')->value('total') ?? 0;
         $totalNet = $totalIncome - $totalExpense;
 
         $expenseByCategory = Entry::expense()
             ->whereBetween('date', [$monthStart, $monthEnd])
-            ->selectRaw('category, SUM(amount) as total, COUNT(*) as count')
+            ->selectRaw('category, SUM(amount * exchange_rate) as total, COUNT(*) as count')
             ->groupBy('category')
             ->orderByDesc('total')
             ->get();
 
         // ── Income by category (all time) ─────────────────────────────────────
         $incomeByCategory = Entry::income()
-            ->selectRaw('category, SUM(amount) as total, COUNT(*) as count')
+            ->selectRaw('category, SUM(amount * exchange_rate) as total, COUNT(*) as count')
             ->groupBy('category')
             ->orderByDesc('total')
             ->get();
@@ -39,14 +39,14 @@ class DashboardController extends Controller
         // selectRaw with SQLite's strftime for month grouping
         $monthlyIncome = Entry::income()
             ->where('date', '>=', now()->subMonths(5)->startOfMonth())
-            ->selectRaw("strftime('%Y-%m', date) as month, SUM(amount) as total")
+            ->selectRaw("strftime('%Y-%m', date) as month, SUM(amount * exchange_rate) as total")
             ->groupByRaw("strftime('%Y-%m', date)")
             ->orderBy('month')
-            ->pluck('total', 'month');  // → ['2025-09' => 5200, '2025-10' => 4800, ...]
+            ->pluck('total', 'month');
 
         $monthlyExpense = Entry::expense()
             ->where('date', '>=', now()->subMonths(5)->startOfMonth())
-            ->selectRaw("strftime('%Y-%m', date) as month, SUM(amount) as total")
+            ->selectRaw("strftime('%Y-%m', date) as month, SUM(amount * exchange_rate) as total")
             ->groupByRaw("strftime('%Y-%m', date)")
             ->orderBy('month')
             ->pluck('total', 'month');
