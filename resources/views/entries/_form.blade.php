@@ -1,7 +1,10 @@
 {{-- resources/views/entries/_form.blade.php --}}
 {{-- $entry is optional (null for create, model for edit) --}}
 
-<div x-data="{ type: '{{ old('type', $entry->type ?? $defaultType ?? 'expense') }}' }" class="space-y-5">
+<div x-data="{
+        type: '{{ old('type', $entry->type ?? $defaultType ?? 'expense') }}',
+        recurring: {{ old('recurring', $entry->recurring ?? false) ? 'true' : 'false' }}
+    }" class="space-y-5">
 
     {{-- Type selector --}}
     <div>
@@ -92,7 +95,6 @@
         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Date *</label>
         <input type="date" name="date"
                value="{{ old('date', isset($entry) ? $entry->date->format('Y-m-d') : now()->format('Y-m-d')) }}"
-               max="{{ now()->format('Y-m-d') }}"
                class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 {{ $errors->has('date') ? 'border-red-400' : '' }}">
         @error('date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
     </div>
@@ -106,6 +108,44 @@
                   placeholder="Any extra detail..."
                   class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400">{{ old('note', $entry->note ?? '') }}</textarea>
         @error('note') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+    </div>
+
+    {{-- Recurring --}}
+    <div class="border border-slate-200 rounded-xl p-4 space-y-3">
+        {{-- Toggle --}}
+        <label class="flex items-center gap-3 cursor-pointer">
+            <input type="hidden" name="recurring" value="0">
+            <input type="checkbox" name="recurring" value="1"
+                   x-model="recurring"
+                   {{ old('recurring', $entry->recurring ?? false) ? 'checked' : '' }}
+                   class="w-4 h-4 rounded border-slate-300 text-slate-800 focus:ring-slate-400">
+            <div>
+                <span class="text-sm font-semibold text-slate-700">🔁 Recurring entry</span>
+                <p class="text-xs text-slate-400">Auto-create this entry on a schedule</p>
+            </div>
+        </label>
+
+        {{-- Frequency + Until (shown only when recurring is checked) --}}
+        <div x-show="recurring" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Frequency *</label>
+                <select name="frequency"
+                        class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 {{ $errors->has('frequency') ? 'border-red-400' : '' }}">
+                    <option value="">Select frequency…</option>
+                    @foreach (['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'yearly' => 'Yearly'] as $val => $label)
+                        <option value="{{ $val }}" {{ old('frequency', $entry->frequency ?? '') === $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('frequency') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Repeat Until <span class="font-normal text-slate-300">(optional)</span></label>
+                <input type="date" name="recurring_until"
+                       value="{{ old('recurring_until', isset($entry) && $entry->recurring_until ? $entry->recurring_until->format('Y-m-d') : '') }}"
+                       class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 {{ $errors->has('recurring_until') ? 'border-red-400' : '' }}">
+                @error('recurring_until') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
+        </div>
     </div>
 
 </div>

@@ -60,6 +60,10 @@
         .amount-expense {
             color: #ef4444;
         }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
 

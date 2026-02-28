@@ -17,11 +17,18 @@ class Entry extends Model
         'amount',
         'date',
         'note',
+        'recurring',
+        'frequency',
+        'recurring_until',
+        'last_generated_at',
     ];
 
     protected $casts = [
         'amount' => 'integer',
         'date' => 'date',
+        'recurring' => 'boolean',
+        'recurring_until' => 'date',
+        'last_generated_at' => 'date',
     ];
 
     const INCOME_CATEGORIES = [

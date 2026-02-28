@@ -25,9 +25,12 @@ class StoreEntryRequest extends FormRequest
             'type' => 'required|in:income,expense',
             'category' => 'required|string|max:100',
             'description' => 'nullable|string|max:255',
-            'amount' => 'required|integer|min:0',
-            'date' => 'required|date|before_or_equal:today',
+            'amount' => 'required|integer|min:1',
+            'date' => 'required|date',
             'note' => 'nullable|string|max:255',
+            'recurring' => 'nullable|boolean',
+            'frequency' => 'nullable|in:daily,weekly,monthly,yearly|required_if:recurring,1',
+            'recurring_until' => 'nullable|date|after:date',
         ];
     }
 

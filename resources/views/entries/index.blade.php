@@ -119,20 +119,29 @@
                                 {{ $entry->date->format('M j, Y') }}
                             </td>
                             <td class="px-5 py-3 font-medium text-slate-700 max-w-xs">
-                                <div class="truncate">{{ $entry->description }}</div>
+                                <div class="truncate flex items-center gap-1.5">
+                                    @if ($entry->recurring)
+                                        <span
+                                            class="shrink-0 text-xs bg-violet-100 text-violet-700 font-semibold px-1.5 py-0.5 rounded"
+                                            title="Recurring {{ $entry->frequency }}">🔁</span>
+                                    @endif
+                                    {{ $entry->description }}
+                                </div>
                                 @if ($entry->note)
                                     <div class="text-xs text-slate-400 truncate mt-0.5">{{ $entry->note }}</div>
                                 @endif
                             </td>
                             <td class="px-5 py-3 text-slate-500 text-xs hidden md:table-cell">{{ $entry->category }}</td>
                             <td class="px-5 py-3 hidden sm:table-cell">
-                                <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold
-                                                            {{ $entry->is_income ? 'badge-income' : 'badge-expense' }}">
+                                <span
+                                    class="inline-block px-2 py-0.5 rounded text-xs font-semibold
+                                                                    {{ $entry->is_income ? 'badge-income' : 'badge-expense' }}">
                                     {{ ucfirst($entry->type) }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3 text-right mono font-bold
-                                                               {{ $entry->is_income ? 'amount-income' : 'amount-expense' }}">
+                            <td
+                                class="px-5 py-3 text-right mono font-bold
+                                                                       {{ $entry->is_income ? 'amount-income' : 'amount-expense' }}">
                                 {{ $entry->is_income ? '+' : '−' }}Rp {{ number_format($entry->amount, 0, ',', '.') }}
                             </td>
                             <td class="px-3 py-3 text-right">
