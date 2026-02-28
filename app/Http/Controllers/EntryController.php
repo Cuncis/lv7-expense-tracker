@@ -36,6 +36,52 @@ class EntryController extends Controller
         return view('entries.index', compact('entries', 'filters', 'filteredIncome', 'filteredExpense', 'filteredNet', 'allCategories'));
     }
 
+    public function export(Request $request)
+    {
+        $filters = $request->only(['type', 'category', 'from', 'to', 'search']);
+
+        $query = Entry::query()
+            ->when($filters['type'] ?? null, fn($q, $t) => $q->where('type', $t))
+            ->forCategory($filters['category'] ?? null)
+            ->forDateRange($filters['from'] ?? null, $filters['to'] ?? null)
+            ->search($filters['search'] ?? null)
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc');
+
+        $filename = 'entries-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->stream(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM for Excel UTF-8 compatibility
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            // Header row
+            fputcsv($handle, ['Date', 'Type', 'Category', 'Description', 'Amount (Rp)', 'Note']);
+
+            // Chunk to avoid memory exhaustion on large datasets
+            $query->chunk(500, function ($entries) use ($handle) {
+                foreach ($entries as $entry) {
+                    fputcsv($handle, [
+                        $entry->date->format('Y-m-d'),
+                        ucfirst($entry->type),
+                        $entry->category,
+                        $entry->description,
+                        $entry->amount,
+                        $entry->note ?? '',
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-store',
+            'Pragma' => 'no-cache',
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

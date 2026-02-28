@@ -89,8 +89,15 @@
                 {{ $entries->total() }} {{ Str::plural('entry', $entries->total()) }}
                 @if (array_filter($filters)) <span class="text-slate-400">(filtered)</span> @endif
             </p>
-            <a href="{{ route('entries.create') }}" class="text-sm text-emerald-600 hover:underline font-medium">+ Add
-                entry</a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('entries.export', $filters) }}"
+                    class="inline-flex items-center gap-1.5 border border-slate-300 text-slate-600 hover:text-slate-900 hover:border-slate-400 text-xs font-semibold px-3 py-1.5 rounded-lg transition"
+                    title="Download filtered entries as CSV">
+                    ⬇️ Export CSV
+                </a>
+                <a href="{{ route('entries.create') }}" class="text-sm text-emerald-600 hover:underline font-medium">+ Add
+                    entry</a>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -120,12 +127,12 @@
                             <td class="px-5 py-3 text-slate-500 text-xs hidden md:table-cell">{{ $entry->category }}</td>
                             <td class="px-5 py-3 hidden sm:table-cell">
                                 <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold
-                                                    {{ $entry->is_income ? 'badge-income' : 'badge-expense' }}">
+                                                            {{ $entry->is_income ? 'badge-income' : 'badge-expense' }}">
                                     {{ ucfirst($entry->type) }}
                                 </span>
                             </td>
                             <td class="px-5 py-3 text-right mono font-bold
-                                                       {{ $entry->is_income ? 'amount-income' : 'amount-expense' }}">
+                                                               {{ $entry->is_income ? 'amount-income' : 'amount-expense' }}">
                                 {{ $entry->is_income ? '+' : '−' }}Rp {{ number_format($entry->amount, 0, ',', '.') }}
                             </td>
                             <td class="px-3 py-3 text-right">

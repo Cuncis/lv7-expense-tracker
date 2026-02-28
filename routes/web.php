@@ -18,6 +18,7 @@ Route::resource('entries', EntryController::class)->except('show');
 
 // Trash & restore routes — MUST come before the resource to avoid route conflicts
 Route::prefix('entries')->name('entries.')->group(function () {
+    Route::get('/export', [EntryController::class, 'export'])->name('export');
     Route::get('/trash', [EntryController::class, 'trash'])->name('trash');
     Route::patch('/{id}/restore', [EntryController::class, 'restore'])->name('restore');
     Route::delete('/{id}/force', [EntryController::class, 'forceDelete'])->name('forceDelete');
